@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBISL Campus | Bilingual Practicum</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        },
+                        tech: {
+                            500: '#3b82f6',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sinhala: ['Iskoola Pota', 'Nirmala UI', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar for the Command Center feel */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Hide scrollbar for sidebar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Print Optimization */
+        @media print {
+            body { background: white !important; color: black !important; }
+            .print-hide { display: none !important; }
+            .print-glass { background: white !important; border: 1px solid #cbd5e1 !important; color: black !important; box-shadow: none !important; filter: none !important; }
+            .print-text { color: black !important; }
+            .print-text-muted { color: #475569 !important; }
+            #root { height: auto !important; overflow: visible !important; }
+        }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans h-screen overflow-hidden selection:bg-brand-500 selection:text-white">
+    <div id="root" class="h-full"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- INLINE ICONS (Lucide Equivalents for absolute standalone stability) ---
+        const IconGlobe = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>;
+        const IconBuilding = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>;
+        const IconFlask = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>;
+        const IconSettings = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
+        const IconTerminal = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>;
+        const IconMessage = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
+        const IconPrinter = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>;
+        const IconTarget = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+        const IconWorkflow = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7v8"/><path d="M12 7v4"/><path d="M16 7v10"/></svg>;
+
+        // --- COMPONENTS ---
+
+        // 1. CASE INSIGHT
+        const TabCaseInsight = () => (
+            <div className="space-y-6 animate-fade-in">
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">Zenith Corp: The Hybrid Reality</h2>
+                    <p className="text-slate-400 print-text-muted">Module 1 Core Case Study Breakdown</p>
+                    <p className="text-sm text-slate-500 italic mt-1 font-sinhala">මොඩියුලය 1: ප්‍රධාන සිද්ධි අධ්‍යයනය</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Problem */}
+                    <div className="glass-panel print-glass p-6 rounded-2xl border-t-4 border-t-red-500">
+                        <div className="text-red-400 mb-4 font-bold tracking-widest text-sm">01 / PROBLEM</div>
+                        <h3 className="text-xl font-semibold mb-3 print-text">Rigid Rule Books</h3>
+                        <p className="text-slate-300 text-sm mb-4 leading-relaxed print-text-muted">
+                            The transition caused acute pain for long-term administrators who struggled without rigid rule books, exposing the tension between legacy stability and modern agility.
+                        </p>
+                        <div className="pt-4 border-t border-slate-700/50">
+                            <h4 className="text-sm font-semibold text-slate-400 mb-2 font-sinhala">ගැටලුව</h4>
+                            <p className="text-slate-500 text-sm italic font-sinhala">
+                                දැඩි නීති රීති නොමැතිව කටයුතු කිරීමට දිගුකාලීන පරිපාලකයින් අපහසුතාවයට පත්වීම නිසා පැරණි ස්ථාවරත්වය සහ නවීන වේගවත් බව අතර ගැටුමක් ඇති විය.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Approach */}
+                    <div className="glass-panel print-glass p-6 rounded-2xl border-t-4 border-t-blue-500">
+                        <div className="text-blue-400 mb-4 font-bold tracking-widest text-sm">02 / APPROACH</div>
+                        <h3 className="text-xl font-semibold mb-3 print-text">Hybrid Planning Model</h3>
+                        <p className="text-slate-300 text-sm mb-4 leading-relaxed print-text-muted">
+                            Implementing an Automated Administrative Core for annual corporate vision/compliance, merged with a Flat, Agile Management structure for real-time pivots.
+                        </p>
+                        <div className="pt-4 border-t border-slate-700/50">
+                            <h4 className="text-sm font-semibold text-slate-400 mb-2 font-sinhala">ප්‍රවේශය</h4>
+                            <p className="text-slate-500 text-sm italic font-sinhala">
+                                වාර්ෂික දැක්ම සහ අනුකූලතාවය සඳහා ස්වයංක්‍රීය පරිපාලන හරයක් සමඟ, ක්ෂණික තීරණ සඳහා පැතලි, වේගවත් කළමනාකරණ ව්‍යුහයක් ඒකාබද්ධ කිරීම.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Result */}
+                    <div className="glass-panel print-glass p-6 rounded-2xl border-t-4 border-t-brand-500">
+                        <div className="text-brand-400 mb-4 font-bold tracking-widest text-sm">03 / RESULT</div>
+                        <h3 className="text-xl font-semibold mb-3 print-text">Agile Breakthrough</h3>
+                        <p className="text-slate-300 text-sm mb-4 leading-relaxed print-text-muted">
+                            A highly optimized corporate machine resulting in <span className="text-brand-400 font-bold">-3 Management Layers</span> and <span className="text-brand-400 font-bold">+40% Employee Engagement</span>.
+                        </p>
+                        <div className="pt-4 border-t border-slate-700/50">
+                            <h4 className="text-sm font-semibold text-slate-400 mb-2 font-sinhala">ප්‍රතිඵලය</h4>
+                            <p className="text-slate-500 text-sm italic font-sinhala">
+                                කළමනාකරණ ස්ථර 3කින් අඩු කිරීම සහ සේවක සහභාගීත්වය 40%කින් වැඩි කරමින් ඉහළ ප්‍රශස්තකරණයකට ලක්වූ ආයතනික ව්‍යුහයක් නිර්මාණය වීම.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // 2. DEEP DIVE ANALYSIS
+        const TabDeepDive = () => {
+            const concepts = [
+                {
+                    title: "Management vs. Administration",
+                    titleSin: "කළමනාකරණය සහ පරිපාලනය",
+                    en: "Management is strategic, fluid, and action-oriented (focusing on 'How' and 'Who'). Administration is policy-driven, procedural, and establishing boundaries (focusing on 'What' and 'When').",
+                    sin: "කළමනාකරණය යනු උපායමාර්ගික, වෙනස්වන සුළු සහ ක්‍රියාකාරී අංශයකි ('කෙසේද' යන්න). පරිපාලනය යනු ප්‍රතිපත්ති මත පදනම් වූ සහ සීමාවන් ස්ථාපිත කරන ක්‍රියා පටිපාටියකි ('කුමක්ද' යන්න)."
+                },
+                {
+                    title: "Tall vs. Flat Organizational Structures",
+                    titleSin: "උසස් (Tall) සහ පැතලි (Flat) සංවිධාන ව්‍යුහයන්",
+                    en: "Tall structures provide rigid hierarchy and stability but suffer from slow communication. Flat structures empower employees and enable rapid pivots, matching the modern Agile framework.",
+                    sin: "උසස් ව්‍යුහයන් දැඩි ධූරාවලියක් සහ ස්ථාවරත්වයක් ලබා දුන්නද සන්නිවේදනය ප්‍රමාද කරයි. පැතලි ව්‍යුහයන් සේවකයින් සවිබල ගන්වන අතර වේගවත් තීරණ ගැනීමට ඉඩ සලසයි."
+                },
+                {
+                    title: "Scientific vs. Humanistic Management",
+                    titleSin: "විද්‍යාත්මක සහ මානවවාදී කළමනාකරණය",
+                    en: "Taylor's Scientific approach focuses on standardizing tasks for maximum efficiency ('One Best Way'). The Humanistic approach shifts focus to employee well-being, psychology, and engagement.",
+                    sin: "ටේලර්ගේ විද්‍යාත්මක ක්‍රමය උපරිම කාර්යක්ෂමතාව සඳහා කාර්යයන් ප්‍රමිතිකරණය කරයි. මානවවාදී ක්‍රමය සේවක යහපැවැත්ම සහ මානසිකත්වය කෙරෙහි අවධානය යොමු කරයි."
+                }
+            ];
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">Theoretical Core Deep Dive</h2>
+                        <p className="text-slate-400 print-text-muted">Interactive Analysis of Fundamental Traits</p>
+                        <p className="text-sm text-slate-500 italic mt-1 font-sinhala">මූලික සංකල්ප පිළිබඳ ගැඹුරු විශ්ලේෂණය</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        {concepts.map((item, i) => (
+                            <div key={i} className="glass-panel print-glass p-5 rounded-xl transition-all hover:bg-slate-800/60 group">
+                                <div className="flex flex-col md:flex-row gap-6 items-start">
+                                    <div className="bg-slate-800 print:bg-white text-brand-400 print:text-black w-12 h-12 rounded-lg flex items-center justify-center font-bold text-xl shrink-0">
+                                        0{i+1}
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-bold text-slate-100 print-text mb-1">{item.title}</h3>
+                                        <p className="text-brand-500/80 font-sinhala text-sm mb-3">{item.titleSin}</p>
+                                        
+                                        <div className="bg-slate-900/50 print-glass p-4 rounded-lg border border-slate-700/50 mb-3">
+                                            <p className="text-slate-300 print-text-muted text-sm leading-relaxed">{item.en}</p>
+                                        </div>
+                                        <div className="px-4">
+                                            <p className="text-slate-500 print-text-muted text-sm italic font-sinhala leading-relaxed">{item.sin}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // 3. SCENARIO SUITE
+        const TabScenarioSuite = () => {
+            const scenarios = [
+                {
+                    id: "A",
+                    type: "The App Start-Up",
+                    typeSin: "නව තාක්ෂණික සමාගම (Startup)",
+                    context: "High market volatility, rapid product iterations required.",
+                    en: "Requires a Flat Agile structure. Strict scientific administration will kill innovation. Focus on tiger teams and real-time metrics.",
+                    sin: "පැතලි සහ වේගවත් ව්‍යුහයක් අවශ්‍ය වේ. දැඩි විද්‍යාත්මක පරිපාලනය නවෝත්පාදනය විනාශ කරයි. කණ්ඩායම් වැඩ සහ ක්ෂණික තීරණ කෙරෙහි අවධානය යොමු කරන්න."
+                },
+                {
+                    id: "B",
+                    type: "The Garment Factory",
+                    typeSin: "ඇඟලුම් කර්මාන්තශාලාව",
+                    context: "High volume production, narrow margins, large workforce.",
+                    en: "Relies heavily on Scientific Management. Needs clear hierarchies (Tall Structure), 'One Best Way' standardization, and strict administrative rule books to maintain output.",
+                    sin: "විද්‍යාත්මක කළමනාකරණය මත දැඩි ලෙස රඳා පවතී. නිෂ්පාදනය පවත්වා ගැනීම සඳහා පැහැදිලි ධූරාවලියක් (උසස් ව්‍යුහයක්), ප්‍රමිතිකරණය සහ දැඩි පරිපාලන නීති අවශ්‍ය වේ."
+                },
+                {
+                    id: "C",
+                    type: "The Hybrid Bank",
+                    typeSin: "දෙමුහුන් බැංකුව",
+                    context: "Requires strict legal compliance but needs digital agility.",
+                    en: "Implements the Zenith Model: Automated Administrative Core for legal and financial stability, paired with Flat Management for digital product development.",
+                    sin: "සෙනිත් (Zenith) ආකෘතිය ක්‍රියාත්මක කරයි: නෛතික සහ මූල්‍ය ස්ථාවරත්වය සඳහා ස්වයංක්‍රීය පරිපාලන හරයක් සහ ඩිජිටල් නිෂ්පාදන සංවර්ධනය සඳහා පැතලි කළමනාකරණයක්."
+                }
+            ];
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">Scenario Suite</h2>
+                        <p className="text-slate-400 print-text-muted">Real-world Application & Structural Decisions</p>
+                        <p className="text-sm text-slate-500 italic mt-1 font-sinhala">ප්‍රායෝගික ව්‍යාපාරික අවස්ථා සහ ව්‍යුහාත්මක තීරණ</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {scenarios.map((sc) => (
+                            <div key={sc.id} className="glass-panel print-glass p-6 rounded-2xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-brand-500/10 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+                                
+                                <div className="text-5xl font-black text-slate-800 print:text-slate-200 absolute top-4 right-4 z-0 opacity-50">{sc.id}</div>
+                                
+                                <div className="relative z-10">
+                                    <h3 className="text-xl font-bold text-white print-text mb-1">{sc.type}</h3>
+                                    <h4 className="text-sm text-brand-400 font-sinhala mb-4">{sc.typeSin}</h4>
+                                    
+                                    <div className="mb-4 inline-block bg-slate-900 print:bg-slate-100 text-xs px-3 py-1 rounded text-slate-300 print-text uppercase tracking-wider font-semibold">
+                                        Context
+                                    </div>
+                                    <p className="text-sm text-slate-300 print-text-muted mb-4">{sc.context}</p>
+                                    
+                                    <div className="bg-slate-900/50 print-glass p-4 rounded-lg mb-3 border-l-2 border-brand-500">
+                                        <p className="text-sm text-slate-200 print-text">{sc.en}</p>
+                                    </div>
+                                    <p className="text-xs text-slate-500 print-text-muted italic font-sinhala leading-relaxed">{sc.sin}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // 4. DIAGNOSTIC LAB
+        const TabDiagnosticLab = () => {
+            // Calc 1 State
+            const [workforce, setWorkforce] = useState(250);
+            const [managers, setManagers] = useState(25);
+            const span = (workforce / managers).toFixed(1);
+
+            // Calc 2 State
+            const [rigidity, setRigidity] = useState(50);
+            const [volatility, setVolatility] = useState(50);
+            const isAgileDeficit = volatility > rigidity + 20;
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">Diagnostic Lab</h2>
+                        <p className="text-slate-400 print-text-muted">Structural Calculators based on Core Theories</p>
+                        <p className="text-sm text-slate-500 italic mt-1 font-sinhala">මූලික න්‍යායන් මත පදනම් වූ ව්‍යුහාත්මක ගණක යන්ත්‍ර</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        
+                        {/* Calculator 1 */}
+                        <div className="glass-panel print-glass p-6 rounded-2xl">
+                            <h3 className="text-lg font-bold text-white print-text mb-1 flex items-center gap-2">
+                                <IconBuilding /> Span of Control Estimator
+                            </h3>
+                            <p className="text-sm text-slate-500 font-sinhala mb-6 italic">පාලන පරාසය ඇස්තමේන්තු කිරීම</p>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex justify-between mb-2">
+                                        <label className="text-sm text-slate-300">Total Workforce</label>
+                                        <span className="text-brand-400 font-mono">{workforce}</span>
+                                    </div>
+                                    <input type="range" min="10" max="1000" value={workforce} onChange={(e) => setWorkforce(Number(e.target.value))} className="w-full accent-brand-500" />
+                                </div>
+                                
+                                <div>
+                                    <div className="flex justify-between mb-2">
+                                        <label className="text-sm text-slate-300">Management Roles</label>
+                                        <span className="text-brand-400 font-mono">{managers}</span>
+                                    </div>
+                                    <input type="range" min="1" max="100" value={managers} onChange={(e) => setManagers(Number(e.target.value))} className="w-full accent-brand-500" />
+                                </div>
+
+                                <div className="mt-6 p-4 bg-slate-900 print:bg-slate-100 rounded-xl text-center border border-slate-700/50">
+                                    <div className="text-xs text-slate-400 mb-1 uppercase tracking-wider">Average Span of Control</div>
+                                    <div className="text-3xl font-black text-white print-text">{span} <span className="text-lg font-normal text-slate-500">Staff/Manager</span></div>
+                                    <p className="text-xs text-slate-500 mt-2 font-sinhala italic">
+                                        {span > 15 ? 'ඉහළ අගයකි - පැතලි ව්‍යුහයකට (Flat) සුදුසුයි.' : span < 5 ? 'පහළ අගයකි - උසස් ව්‍යුහයකට (Tall) සුදුසුයි.' : 'මධ්‍යස්ථ අගයකි.'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Calculator 2 */}
+                        <div className="glass-panel print-glass p-6 rounded-2xl">
+                            <h3 className="text-lg font-bold text-white print-text mb-1 flex items-center gap-2">
+                                <IconSettings /> Agility vs Stability Index
+                            </h3>
+                            <p className="text-sm text-slate-500 font-sinhala mb-6 italic">වේගවත් බව සහ ස්ථාවරත්ව දර්ශකය</p>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex justify-between mb-2">
+                                        <label className="text-sm text-slate-300">Administrative Rigidity</label>
+                                        <span className="text-blue-400 font-mono">{rigidity}%</span>
+                                    </div>
+                                    <input type="range" min="0" max="100" value={rigidity} onChange={(e) => setRigidity(Number(e.target.value))} className="w-full accent-blue-500" />
+                                </div>
+                                
+                                <div>
+                                    <div className="flex justify-between mb-2">
+                                        <label className="text-sm text-slate-300">Market Volatility</label>
+                                        <span className="text-red-400 font-mono">{volatility}%</span>
+                                    </div>
+                                    <input type="range" min="0" max="100" value={volatility} onChange={(e) => setVolatility(Number(e.target.value))} className="w-full accent-red-500" />
+                                </div>
+
+                                <div className={`mt-6 p-4 rounded-xl text-center border transition-colors ${isAgileDeficit ? 'bg-red-900/20 border-red-500/50' : 'bg-brand-900/20 border-brand-500/50'}`}>
+                                    <div className="text-xs text-slate-400 mb-1 uppercase tracking-wider">System Diagnosis</div>
+                                    <div className={`text-lg font-bold ${isAgileDeficit ? 'text-red-400' : 'text-brand-400'}`}>
+                                        {isAgileDeficit ? '⚠️ Agility Deficit: Shift to Flat Structure' : '✅ System Balanced'}
+                                    </div>
+                                    <p className={`text-xs mt-2 font-sinhala italic ${isAgileDeficit ? 'text-red-300' : 'text-brand-300'}`}>
+                                        {isAgileDeficit 
+                                            ? 'අවදානමක් පවතී: වෙළඳපල වෙනස්වීම් වේගවත් බැවින් පැතලි (Flat) ව්‍යුහයකට මාරුවන්න.' 
+                                            : 'පද්ධතිය සමබරව පවතී.'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        };
+
+        // 5. SYSTEM SIMULATION (HRIS Organizational Demo)
+        const TabSystemSimulation = () => {
+            const [orgType, setOrgType] = useState('hybrid');
+            const [isProcessing, setIsProcessing] = useState(false);
+
+            const orgConfigs = {
+                tall: {
+                    id: 'tall',
+                    name: "Tall (Scientific)",
+                    nameSin: "උසස් ව්‍යුහය (විද්‍යාත්මක)",
+                    layers: 6,
+                    span: "1:4 (Narrow)",
+                    commSpeed: "Slow / Bottlenecked",
+                    commSpeedSin: "මන්දගාමී / ප්‍රමාද වූ",
+                    engagement: "35%",
+                    hierarchy: ["CEO", "Vice Presidents", "Directors", "Senior Managers", "Supervisors", "Operational Staff"],
+                    color: "border-red-500",
+                    bg: "bg-red-500",
+                    text: "text-red-400"
+                },
+                flat: {
+                    id: 'flat',
+                    name: "Flat (Agile)",
+                    nameSin: "පැතලි ව්‍යුහය (වේගවත්)",
+                    layers: 2,
+                    span: "1:15 (Wide)",
+                    commSpeed: "Fast / Direct",
+                    commSpeedSin: "වේගවත් / ඍජු",
+                    engagement: "85%",
+                    hierarchy: ["CEO / Product Owner", "Autonomous Cross-functional Teams"],
+                    color: "border-tech-500",
+                    bg: "bg-tech-500",
+                    text: "text-tech-400"
+                },
+                hybrid: {
+                    id: 'hybrid',
+                    name: "Zenith Hybrid",
+                    nameSin: "සෙනිත් දෙමුහුන් (Hybrid)",
+                    layers: 3,
+                    span: "1:8 (Balanced)",
+                    commSpeed: "Optimized",
+                    commSpeedSin: "ප්‍රශස්ත",
+                    engagement: "75%",
+                    hierarchy: ["CEO", "Administrative Core / Dept Heads", "Agile Execution Teams"],
+                    color: "border-brand-500",
+                    bg: "bg-brand-500",
+                    text: "text-brand-400"
+                }
+            };
+
+            const handleTypeChange = (type) => {
+                setIsProcessing(true);
+                setTimeout(() => {
+                    setOrgType(type);
+                    setIsProcessing(false);
+                }, 600); // Simulate system load time
+            };
+
+            const current = orgConfigs[orgType];
+
+            return (
+                <div className="space-y-6 animate-fade-in h-full flex flex-col">
+                    <div className="mb-2 shrink-0">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">HRIS Architecture Demo</h2>
+                        <p className="text-slate-400 print-text-muted">Live demonstration of organizational restructuring impact.</p>
+                        <p className="text-sm text-slate-500 italic mt-1 font-sinhala">ආයතනික ප්‍රතිව්‍යුහගත කිරීමේ බලපෑම පිළිබඳ සජීවී ප්‍රදර්ශනය.</p>
+                    </div>
+
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 min-h-0">
+                        
+                        {/* Control Panel (System Sidebar) */}
+                        <div className="md:col-span-4 glass-panel print-glass rounded-xl border border-slate-700/50 p-5 flex flex-col">
+                            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <IconSettings /> System Config
+                            </h3>
+                            
+                            <div className="space-y-3 mb-6">
+                                {Object.values(orgConfigs).map(type => (
+                                    <button 
+                                        key={type.id}
+                                        onClick={() => handleTypeChange(type.id)}
+                                        className={`w-full text-left p-3 rounded-lg border transition-all ${
+                                            orgType === type.id 
+                                            ? `bg-slate-800 ${type.color} shadow-lg shadow-slate-900/50` 
+                                            : 'border-slate-700/50 hover:border-slate-500 text-slate-400 hover:text-slate-200'
+                                        }`}
+                                    >
+                                        <div className="font-bold">{type.name}</div>
+                                        <div className="text-xs font-sinhala italic opacity-70 mt-1">{type.nameSin}</div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="mt-auto bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                                <div className="text-xs text-slate-500 mb-2">LIVE SYSTEM METRICS</div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="text-slate-300">Comm. Speed</span>
+                                            <span className={current.text}>{current.commSpeed}</span>
+                                        </div>
+                                        <div className="text-xs text-slate-500 font-sinhala italic">{current.commSpeedSin}</div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="text-slate-300">Est. Engagement</span>
+                                            <span className={current.text}>{current.engagement}</span>
+                                        </div>
+                                        <div className="w-full bg-slate-800 rounded-full h-1.5 mt-1">
+                                            <div className={`${current.bg} h-1.5 rounded-full transition-all duration-1000`} style={{width: current.engagement}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Visualizer (Main HRIS Area) */}
+                        <div className="md:col-span-8 glass-panel print-glass rounded-xl border border-slate-700/50 flex flex-col overflow-hidden relative">
+                            {/* Fake System Topbar */}
+                            <div className="bg-slate-900/80 border-b border-slate-700/50 px-4 py-3 flex justify-between items-center shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <IconBuilding />
+                                    <span className="font-mono text-sm text-slate-300">OrgArchitect™ Workspace</span>
+                                </div>
+                                <div className="text-xs font-mono text-slate-500">
+                                    Total Headcount: 250
+                                </div>
+                            </div>
+
+                            {/* Org Chart Visualization Area */}
+                            <div className="flex-1 p-6 overflow-y-auto bg-slate-950/50 relative flex flex-col items-center justify-start gap-2">
+                                
+                                {isProcessing ? (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 backdrop-blur-sm">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+                                            <div className="text-brand-400 font-mono text-sm animate-pulse">Reallocating Resources...</div>
+                                        </div>
+                                    </div>
+                                ) : null}
+
+                                <div className="text-center mb-6">
+                                    <h3 className={`text-xl font-black ${current.text}`}>{current.name}</h3>
+                                    <div className="text-sm text-slate-400 font-mono mt-1">
+                                        Layers: {current.layers} | Span: {current.span}
+                                    </div>
+                                </div>
+
+                                {/* Dynamic Hierarchy Tree */}
+                                <div className="w-full max-w-md space-y-4 relative">
+                                    {/* Vertical connecting line */}
+                                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-700 -translate-x-1/2 z-0"></div>
+
+                                    {current.hierarchy.map((layer, idx) => {
+                                        // Make the bottom layer visually larger to represent "Staff"
+                                        const isLast = idx === current.hierarchy.length - 1;
+                                        
+                                        return (
+                                            <div key={idx} className="relative z-10 animate-fade-in" style={{animationDelay: `${idx * 100}ms`}}>
+                                                <div className={`
+                                                    mx-auto border bg-slate-900 shadow-xl
+                                                    flex flex-col items-center justify-center text-center p-3 rounded-lg
+                                                    ${isLast ? 'w-full py-8' : 'w-48'}
+                                                    ${current.color}
+                                                `}>
+                                                    <span className="font-semibold text-slate-200 text-sm">{layer}</span>
+                                                    <span className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">
+                                                        Layer {idx + 1}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        };
+
+        // 5.B SYSTEM SIMULATION (KPI Cascade ERP Demo)
+        const TabSystemKPI = () => {
+            const [strategy, setStrategy] = useState('expansion');
+            
+            const cascadeData = {
+                expansion: {
+                    title: "Aggressive Expansion",
+                    titleSin: "වේගවත් ව්‍යාප්තිය",
+                    admin: "Legal & Capital Acquisition",
+                    mgmt: "Launch 3 New Regional Hubs",
+                    agile: "Onboard 50 Local Vendors/Week"
+                },
+                stability: {
+                    title: "Core Stability & Compliance",
+                    titleSin: "ස්ථාවරත්වය සහ අනුකූලතාවය",
+                    admin: "Strict Regulatory Audits",
+                    mgmt: "Reduce Overhead by 15%",
+                    agile: "Optimize Supply Chain Routes"
+                },
+                innovation: {
+                    title: "Digital Transformation",
+                    titleSin: "ඩිජිටල් පරිවර්තනය",
+                    admin: "IP Protection & R&D Funding",
+                    mgmt: "Develop Custom CRM App",
+                    agile: "Push 2 Software Updates/Sprint"
+                }
+            };
+
+            const current = cascadeData[strategy];
+
+            return (
+                <div className="space-y-6 animate-fade-in h-full flex flex-col">
+                    <div className="mb-2 shrink-0">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">Strategic KPI Cascade (ERP)</h2>
+                        <p className="text-slate-400 print-text-muted">How Administration policies map down to Agile execution metrics.</p>
+                        <p className="text-sm text-slate-500 italic mt-1 font-sinhala">පරිපාලන ප්‍රතිපත්ති, ක්‍රියාකාරී මිනුම් දඬු බවට පත්වන ආකාරය.</p>
+                    </div>
+
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 min-h-0">
+                        {/* Selector */}
+                        <div className="md:col-span-4 glass-panel print-glass p-5 rounded-xl border border-slate-700/50 flex flex-col justify-center">
+                            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">Set Corporate Objective</h3>
+                            <div className="space-y-3">
+                                {Object.entries(cascadeData).map(([key, data]) => (
+                                    <button 
+                                        key={key} onClick={() => setStrategy(key)}
+                                        className={`w-full text-left p-4 rounded-xl border transition-all ${strategy === key ? 'bg-brand-900/30 border-brand-500 text-brand-300 shadow-lg shadow-brand-900/20' : 'border-slate-700/50 hover:bg-slate-800 text-slate-400'}`}
+                                    >
+                                        <div className="font-bold">{data.title}</div>
+                                        <div className="text-xs font-sinhala italic mt-1 opacity-80">{data.titleSin}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Cascade Viewer */}
+                        <div className="md:col-span-8 glass-panel print-glass p-6 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div className="absolute top-10 bottom-10 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-brand-500 z-0"></div>
+                            
+                            {/* Tier 1: Admin */}
+                            <div className="relative z-10 bg-slate-900 border-2 border-blue-500 p-5 rounded-xl w-3/4 mb-8 text-center shadow-lg shadow-blue-900/20 transition-all duration-500">
+                                <div className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">1. Administration (The "What")</div>
+                                <h4 className="text-lg font-semibold text-white">{current.admin}</h4>
+                                <div className="text-xs text-slate-500 font-sinhala italic mt-1">පරිපාලන මට්ටම - ප්‍රධාන ප්‍රතිපත්ති</div>
+                            </div>
+
+                            {/* Tier 2: Management */}
+                            <div className="relative z-10 bg-slate-900 border-2 border-purple-500 p-5 rounded-xl w-3/4 mb-8 text-center shadow-lg shadow-purple-900/20 transition-all duration-500">
+                                <div className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2">2. Management (The "How")</div>
+                                <h4 className="text-lg font-semibold text-white">{current.mgmt}</h4>
+                                <div className="text-xs text-slate-500 font-sinhala italic mt-1">කළමනාකරණ මට්ටම - දෙපාර්තමේන්තු ඉලක්ක</div>
+                            </div>
+
+                            {/* Tier 3: Agile */}
+                            <div className="relative z-10 bg-slate-900 border-2 border-brand-500 p-5 rounded-xl w-3/4 text-center shadow-lg shadow-brand-900/20 transition-all duration-500">
+                                <div className="text-xs font-bold text-brand-400 uppercase tracking-widest mb-2">3. Agile Operations (The "Action")</div>
+                                <h4 className="text-lg font-semibold text-white">{current.agile}</h4>
+                                <div className="text-xs text-slate-500 font-sinhala italic mt-1">මෙහෙයුම් මට්ටම - කඩිනම් කාර්යයන්</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 5.C SYSTEM SIMULATION (Workflow Mgmt Simulator)
+        const TabSystemWorkflow = () => {
+            const [model, setModel] = useState('scientific');
+
+            return (
+                <div className="space-y-6 animate-fade-in h-full flex flex-col">
+                    <div className="mb-2 shrink-0">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">Workflow Management Simulator</h2>
+                        <p className="text-slate-400 print-text-muted">Comparing Taylor's Scientific Management vs. Modern Agile Workflows.</p>
+                        <p className="text-sm text-slate-500 italic mt-1 font-sinhala">විද්‍යාත්මක කළමනාකරණය සහ නවීන වේගවත් (Agile) ක්‍රමවේද සැසඳීම.</p>
+                    </div>
+
+                    <div className="flex-1 glass-panel print-glass rounded-xl border border-slate-700/50 p-6 flex flex-col">
+                        
+                        {/* Toggle */}
+                        <div className="flex justify-center mb-8 shrink-0">
+                            <div className="bg-slate-900 p-1 rounded-xl flex border border-slate-700">
+                                <button onClick={() => setModel('scientific')} className={`px-6 py-2 rounded-lg font-semibold transition-all ${model === 'scientific' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>
+                                    Scientific (Linear)
+                                </button>
+                                <button onClick={() => setModel('agile')} className={`px-6 py-2 rounded-lg font-semibold transition-all ${model === 'agile' ? 'bg-brand-500 text-white' : 'text-slate-400 hover:text-slate-200'}`}>
+                                    Agile (Iterative)
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Visualization Board */}
+                        <div className="flex-1 bg-slate-950/50 rounded-xl border border-slate-800 p-8 flex items-center justify-center relative overflow-hidden">
+                            {model === 'scientific' ? (
+                                <div className="flex items-center gap-4 animate-fade-in w-full max-w-3xl overflow-x-auto">
+                                    <div className="bg-slate-800 border-2 border-blue-500/50 p-4 rounded text-center min-w-[150px]">
+                                        <div className="text-xs text-blue-400 mb-1 font-mono">Stage 1</div>
+                                        <div className="font-bold">Standardize</div>
+                                    </div>
+                                    <div className="text-blue-500 font-black text-2xl">→</div>
+                                    <div className="bg-slate-800 border-2 border-blue-500/50 p-4 rounded text-center min-w-[150px]">
+                                        <div className="text-xs text-blue-400 mb-1 font-mono">Stage 2</div>
+                                        <div className="font-bold">Execute</div>
+                                    </div>
+                                    <div className="text-blue-500 font-black text-2xl">→</div>
+                                    <div className="bg-slate-800 border-2 border-blue-500/50 p-4 rounded text-center min-w-[150px]">
+                                        <div className="text-xs text-blue-400 mb-1 font-mono">Stage 3</div>
+                                        <div className="font-bold">Inspect</div>
+                                    </div>
+                                    
+                                    <div className="absolute bottom-4 left-0 right-0 text-center text-sm text-slate-400 font-sinhala italic animate-fade-in">
+                                        "One Best Way" - දැඩි, පියවරෙන් පියවර සිදුවන රේඛීය ක්‍රමවේදය (Taylor's Theory)
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="relative w-64 h-64 animate-fade-in">
+                                    {/* Circular Agile Flow */}
+                                    <div className="absolute inset-0 border-4 border-dashed border-brand-500/30 rounded-full animate-[spin_10s_linear_infinite]"></div>
+                                    
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 border-2 border-brand-500 p-3 rounded-lg text-center shadow-lg shadow-brand-900/20">
+                                        <div className="text-xs text-brand-400 mb-1 font-mono">Sprint</div>
+                                        <div className="font-bold">Plan</div>
+                                    </div>
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-slate-800 border-2 border-brand-500 p-3 rounded-lg text-center shadow-lg shadow-brand-900/20">
+                                        <div className="text-xs text-brand-400 mb-1 font-mono">Sprint</div>
+                                        <div className="font-bold">Review</div>
+                                    </div>
+                                    <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 bg-slate-800 border-2 border-brand-500 p-3 rounded-lg text-center shadow-lg shadow-brand-900/20">
+                                        <div className="text-xs text-brand-400 mb-1 font-mono">Daily</div>
+                                        <div className="font-bold">Build</div>
+                                    </div>
+                                    <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 bg-slate-800 border-2 border-brand-500 p-3 rounded-lg text-center shadow-lg shadow-brand-900/20">
+                                        <div className="text-xs text-brand-400 mb-1 font-mono">Live</div>
+                                        <div className="font-bold">Adapt</div>
+                                    </div>
+
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="text-center">
+                                            <div className="font-black text-brand-400">TIGER</div>
+                                            <div className="font-black text-brand-400">TEAM</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-80 text-center text-sm text-slate-400 font-sinhala italic whitespace-nowrap">
+                                        ස්වයං පාලිත කණ්ඩායම් සහ චක්‍රීය, නම්‍යශීලී ක්‍රමවේදය (Modern Humanistic)
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 6. BREAKOUT ROOMS
+        const TabBreakoutRooms = () => {
+            const prompts = [
+                {
+                    q: "Crisis Mechanics: In a critical disruption, does a Tall Structure or a Flat Structure offer superior resilience?",
+                    qSin: "අර්බුදයකදී උසස් හෝ පැතලි ව්‍යුහයකින් වඩාත් ඔරොත්තු දෙන්නේ කුමක්ද?"
+                },
+                {
+                    q: "The Dual Engine: Why is a brilliant Manager guaranteed to fail if they operate as a poor Administrator?",
+                    qSin: "දක්ෂ කළමනාකරුවෙකු දුර්වල පරිපාලකයෙකු ලෙස කටයුතු කළහොත් අසමත් වන්නේ ඇයි?"
+                },
+                {
+                    q: "The Balance: How do you calibrate the demand for Scientific efficiency against the Humanistic necessity of employee well-being?",
+                    qSin: "විද්‍යාත්මක කාර්යක්ෂමතාව සහ මානවවාදී සේවක යහපැවැත්ම සමබර කරන්නේ කෙසේද?"
+                },
+                {
+                    q: "The Objective Cascade: Can departmental operations survive without individual KPIs if corporate objectives are clear?",
+                    qSin: "පැහැදිලි ආයතනික අරමුණු තිබේ නම්, තනි පුද්ගල KPI නොමැතිව වුවද ක්‍රියාකාරකම් පවත්වා ගත හැකිද?"
+                },
+                {
+                    q: "The AI Future: With AI integration, how will the mathematical function of Organizing transform for middle managers?",
+                    qSin: "කෘතිම බුද්ධිය (AI) පැමිණීමත් සමඟ මධ්‍යම කළමනාකරුවන්ගේ සංවිධාන කටයුතු කෙසේ වෙනස් වනු ඇත්ද?"
+                }
+            ];
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2 print-text">Breakout Room Prompts</h2>
+                        <p className="text-slate-400 print-text-muted">High-Impact Discussion Generators</p>
+                        <p className="text-sm text-slate-500 italic mt-1 font-sinhala">සාකච්ඡා සඳහා වන ප්‍රධාන ප්‍රශ්න</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {prompts.map((p, i) => (
+                            <div key={i} className="glass-panel print-glass p-5 rounded-xl border-l-4 border-l-brand-500 hover:bg-slate-800/50 transition-colors">
+                                <div className="flex gap-4">
+                                    <div className="hidden md:flex w-10 h-10 rounded-full bg-brand-900/50 border border-brand-500/30 items-center justify-center shrink-0">
+                                        <IconMessage />
+                                    </div>
+                                    <div>
+                                        <p className="text-lg font-semibold text-slate-100 print-text mb-2 leading-snug">{p.q}</p>
+                                        <p className="text-sm text-slate-400 print-text-muted italic font-sinhala">{p.qSin}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('case');
+
+            const handlePrint = () => {
+                window.print();
+            };
+
+            const navItems = [
+                { id: 'case', icon: <IconGlobe />, label: 'Case Insight' },
+                { id: 'deepdive', icon: <IconBuilding />, label: 'Deep Dive' },
+                { id: 'scenario', icon: <IconFlask />, label: 'Scenario Suite' },
+                { id: 'diagnostic', icon: <IconSettings />, label: 'Diagnostic Lab' },
+                { id: 'system-hris', icon: <IconTerminal />, label: 'HRIS Demo' },
+                { id: 'system-kpi', icon: <IconTarget />, label: 'KPI Cascade' },
+                { id: 'system-workflow', icon: <IconWorkflow />, label: 'Workflow Sim' },
+                { id: 'breakout', icon: <IconMessage />, label: 'Breakout' },
+            ];
+
+            return (
+                <div className="flex h-screen bg-slate-950 overflow-hidden relative">
+                    
+                    {/* Background Graphic elements */}
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 print-hide">
+                        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-900/20 rounded-full blur-[100px]"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-tech-900/20 rounded-full blur-[100px]"></div>
+                    </div>
+
+                    {/* Fixed Sidebar Navigation */}
+                    <nav className="w-20 md:w-24 bg-slate-900/80 backdrop-blur-xl border-r border-slate-800 flex flex-col items-center py-6 z-20 shrink-0 print-hide">
+                        <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center font-black text-white mb-6 shadow-lg shadow-brand-500/20">
+                            OB
+                        </div>
+                        
+                        <div className="flex-1 flex flex-col gap-4 w-full px-2 overflow-y-auto no-scrollbar pb-4">
+                            {navItems.map(item => (
+                                <button 
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`relative group w-12 h-12 shrink-0 mx-auto rounded-xl flex items-center justify-center transition-all duration-300
+                                        ${activeTab === item.id 
+                                            ? 'bg-brand-500/10 text-brand-400 border border-brand-500/30' 
+                                            : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'}`}
+                                >
+                                    {item.icon}
+                                    
+                                    {/* Tooltip */}
+                                    <div className="absolute left-full ml-4 px-3 py-1.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 border border-slate-700">
+                                        {item.label}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        <button onClick={handlePrint} className="w-12 h-12 shrink-0 rounded-xl text-slate-500 hover:text-white hover:bg-slate-800 transition-colors flex items-center justify-center mt-4 tooltip group relative">
+                            <IconPrinter />
+                            <div className="absolute left-full ml-4 px-3 py-1.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 border border-slate-700">
+                                Export / Print
+                            </div>
+                        </button>
+                    </nav>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 flex flex-col h-full overflow-y-auto z-10 relative print:w-full print:overflow-visible">
+                        
+                        {/* Header */}
+                        <header className="px-8 py-6 border-b border-slate-800/50 bg-slate-950/50 backdrop-blur-md sticky top-0 z-30 print-glass print:border-b-2">
+                            <div className="max-w-5xl mx-auto flex justify-between items-end">
+                                <div>
+                                    <h1 className="text-lg md:text-xl font-black tracking-widest text-slate-100 print-text flex items-center gap-3">
+                                        <span className="text-brand-500">OBISL CAMPUS</span> | BILINGUAL PRACTICUM
+                                    </h1>
+                                    <p className="text-xs text-slate-400 font-mono mt-1 print-text-muted">Module 1: Business & Management Principles</p>
+                                </div>
+                                <div className="hidden md:block text-right">
+                                    <div className="text-[10px] uppercase tracking-[0.2em] text-brand-500 font-bold">System Status</div>
+                                    <div className="text-xs text-slate-400 font-mono">Live • English/සිංහල</div>
+                                </div>
+                            </div>
+                        </header>
+
+                        {/* Dynamic Tab Content */}
+                        <div className="flex-1 p-6 md:p-10">
+                            <div className="max-w-5xl mx-auto h-full">
+                                {activeTab === 'case' && <TabCaseInsight />}
+                                {activeTab === 'deepdive' && <TabDeepDive />}
+                                {activeTab === 'scenario' && <TabScenarioSuite />}
+                                {activeTab === 'diagnostic' && <TabDiagnosticLab />}
+                                {activeTab === 'system-hris' && <TabSystemSimulation />}
+                                {activeTab === 'system-kpi' && <TabSystemKPI />}
+                                {activeTab === 'system-workflow' && <TabSystemWorkflow />}
+                                {activeTab === 'breakout' && <TabBreakoutRooms />}
+                            </div>
+                        </div>
+                    </main>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
