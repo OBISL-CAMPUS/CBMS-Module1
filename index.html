@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OBISL Campus | Bilingual Practicum</title>
     
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -74,10 +71,17 @@
 <body class="bg-slate-950 text-slate-50 font-sans h-screen overflow-hidden selection:bg-brand-500 selection:text-white">
     <div id="root" class="h-full"></div>
 
-    <script type="text/babel">
+    <script type="text/javascript">
+        Babel.registerPreset("env", {
+            targets: {
+                browsers: ["last 2 versions", "not dead"]
+            }
+        });
+
+        const code = `
         const { useState, useEffect, useRef } = React;
 
-        // --- INLINE ICONS (Lucide Equivalents for absolute standalone stability) ---
+        // --- INLINE ICONS ---
         const IconGlobe = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>;
         const IconBuilding = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>;
         const IconFlask = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>;
@@ -89,8 +93,6 @@
         const IconWorkflow = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7v8"/><path d="M12 7v4"/><path d="M16 7v10"/></svg>;
 
         // --- COMPONENTS ---
-
-        // 1. CASE INSIGHT
         const TabCaseInsight = () => (
             <div className="space-y-6 animate-fade-in">
                 <div className="mb-8">
@@ -100,7 +102,6 @@
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Problem */}
                     <div className="glass-panel print-glass p-6 rounded-2xl border-t-4 border-t-red-500">
                         <div className="text-red-400 mb-4 font-bold tracking-widest text-sm">01 / PROBLEM</div>
                         <h3 className="text-xl font-semibold mb-3 print-text">Rigid Rule Books</h3>
@@ -115,7 +116,6 @@
                         </div>
                     </div>
 
-                    {/* Approach */}
                     <div className="glass-panel print-glass p-6 rounded-2xl border-t-4 border-t-blue-500">
                         <div className="text-blue-400 mb-4 font-bold tracking-widest text-sm">02 / APPROACH</div>
                         <h3 className="text-xl font-semibold mb-3 print-text">Hybrid Planning Model</h3>
@@ -130,7 +130,6 @@
                         </div>
                     </div>
 
-                    {/* Result */}
                     <div className="glass-panel print-glass p-6 rounded-2xl border-t-4 border-t-brand-500">
                         <div className="text-brand-400 mb-4 font-bold tracking-widest text-sm">03 / RESULT</div>
                         <h3 className="text-xl font-semibold mb-3 print-text">Agile Breakthrough</h3>
@@ -148,7 +147,6 @@
             </div>
         );
 
-        // 2. DEEP DIVE ANALYSIS
         const TabDeepDive = () => {
             const concepts = [
                 {
@@ -205,7 +203,6 @@
             );
         };
 
-        // 3. SCENARIO SUITE
         const TabScenarioSuite = () => {
             const scenarios = [
                 {
@@ -270,14 +267,11 @@
             );
         };
 
-        // 4. DIAGNOSTIC LAB
         const TabDiagnosticLab = () => {
-            // Calc 1 State
             const [workforce, setWorkforce] = useState(250);
             const [managers, setManagers] = useState(25);
             const span = (workforce / managers).toFixed(1);
 
-            // Calc 2 State
             const [rigidity, setRigidity] = useState(50);
             const [volatility, setVolatility] = useState(50);
             const isAgileDeficit = volatility > rigidity + 20;
@@ -292,7 +286,6 @@
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         
-                        {/* Calculator 1 */}
                         <div className="glass-panel print-glass p-6 rounded-2xl">
                             <h3 className="text-lg font-bold text-white print-text mb-1 flex items-center gap-2">
                                 <IconBuilding /> Span of Control Estimator
@@ -326,7 +319,6 @@
                             </div>
                         </div>
 
-                        {/* Calculator 2 */}
                         <div className="glass-panel print-glass p-6 rounded-2xl">
                             <h3 className="text-lg font-bold text-white print-text mb-1 flex items-center gap-2">
                                 <IconSettings /> Agility vs Stability Index
@@ -369,7 +361,6 @@
             );
         };
 
-        // 5. SYSTEM SIMULATION (HRIS Organizational Demo)
         const TabSystemSimulation = () => {
             const [orgType, setOrgType] = useState('hybrid');
             const [isProcessing, setIsProcessing] = useState(false);
@@ -424,7 +415,7 @@
                 setTimeout(() => {
                     setOrgType(type);
                     setIsProcessing(false);
-                }, 600); // Simulate system load time
+                }, 600);
             };
 
             const current = orgConfigs[orgType];
@@ -439,7 +430,6 @@
 
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 min-h-0">
                         
-                        {/* Control Panel (System Sidebar) */}
                         <div className="md:col-span-4 glass-panel print-glass rounded-xl border border-slate-700/50 p-5 flex flex-col">
                             <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
                                 <IconSettings /> System Config
@@ -452,8 +442,8 @@
                                         onClick={() => handleTypeChange(type.id)}
                                         className={`w-full text-left p-3 rounded-lg border transition-all ${
                                             orgType === type.id 
-                                            ? `bg-slate-800 ${type.color} shadow-lg shadow-slate-900/50` 
-                                            : 'border-slate-700/50 hover:border-slate-500 text-slate-400 hover:text-slate-200'
+                                                ? 'bg-slate-800 border-brand-500 shadow-lg shadow-slate-900/50' 
+                                                : 'border-slate-700/50 hover:border-slate-500 text-slate-400 hover:text-slate-200'
                                         }`}
                                     >
                                         <div className="font-bold">{type.name}</div>
@@ -487,9 +477,7 @@
                             </div>
                         </div>
 
-                        {/* Visualizer (Main HRIS Area) */}
                         <div className="md:col-span-8 glass-panel print-glass rounded-xl border border-slate-700/50 flex flex-col overflow-hidden relative">
-                            {/* Fake System Topbar */}
                             <div className="bg-slate-900/80 border-b border-slate-700/50 px-4 py-3 flex justify-between items-center shrink-0">
                                 <div className="flex items-center gap-3">
                                     <IconBuilding />
@@ -500,7 +488,6 @@
                                 </div>
                             </div>
 
-                            {/* Org Chart Visualization Area */}
                             <div className="flex-1 p-6 overflow-y-auto bg-slate-950/50 relative flex flex-col items-center justify-start gap-2">
                                 
                                 {isProcessing ? (
@@ -519,13 +506,10 @@
                                     </div>
                                 </div>
 
-                                {/* Dynamic Hierarchy Tree */}
                                 <div className="w-full max-w-md space-y-4 relative">
-                                    {/* Vertical connecting line */}
                                     <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-700 -translate-x-1/2 z-0"></div>
 
                                     {current.hierarchy.map((layer, idx) => {
-                                        // Make the bottom layer visually larger to represent "Staff"
                                         const isLast = idx === current.hierarchy.length - 1;
                                         
                                         return (
@@ -553,7 +537,6 @@
             );
         };
 
-        // 5.B SYSTEM SIMULATION (KPI Cascade ERP Demo)
         const TabSystemKPI = () => {
             const [strategy, setStrategy] = useState('expansion');
             
@@ -592,7 +575,6 @@
                     </div>
 
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 min-h-0">
-                        {/* Selector */}
                         <div className="md:col-span-4 glass-panel print-glass p-5 rounded-xl border border-slate-700/50 flex flex-col justify-center">
                             <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">Set Corporate Objective</h3>
                             <div className="space-y-3">
@@ -608,25 +590,21 @@
                             </div>
                         </div>
 
-                        {/* Cascade Viewer */}
                         <div className="md:col-span-8 glass-panel print-glass p-6 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center relative overflow-hidden">
                             <div className="absolute top-10 bottom-10 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-brand-500 z-0"></div>
                             
-                            {/* Tier 1: Admin */}
                             <div className="relative z-10 bg-slate-900 border-2 border-blue-500 p-5 rounded-xl w-3/4 mb-8 text-center shadow-lg shadow-blue-900/20 transition-all duration-500">
                                 <div className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">1. Administration (The "What")</div>
                                 <h4 className="text-lg font-semibold text-white">{current.admin}</h4>
                                 <div className="text-xs text-slate-500 font-sinhala italic mt-1">පරිපාලන මට්ටම - ප්‍රධාන ප්‍රතිපත්ති</div>
                             </div>
 
-                            {/* Tier 2: Management */}
                             <div className="relative z-10 bg-slate-900 border-2 border-purple-500 p-5 rounded-xl w-3/4 mb-8 text-center shadow-lg shadow-purple-900/20 transition-all duration-500">
                                 <div className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2">2. Management (The "How")</div>
                                 <h4 className="text-lg font-semibold text-white">{current.mgmt}</h4>
                                 <div className="text-xs text-slate-500 font-sinhala italic mt-1">කළමනාකරණ මට්ටම - දෙපාර්තමේන්තු ඉලක්ක</div>
                             </div>
 
-                            {/* Tier 3: Agile */}
                             <div className="relative z-10 bg-slate-900 border-2 border-brand-500 p-5 rounded-xl w-3/4 text-center shadow-lg shadow-brand-900/20 transition-all duration-500">
                                 <div className="text-xs font-bold text-brand-400 uppercase tracking-widest mb-2">3. Agile Operations (The "Action")</div>
                                 <h4 className="text-lg font-semibold text-white">{current.agile}</h4>
@@ -638,7 +616,6 @@
             );
         };
 
-        // 5.C SYSTEM SIMULATION (Workflow Mgmt Simulator)
         const TabSystemWorkflow = () => {
             const [model, setModel] = useState('scientific');
 
@@ -652,7 +629,6 @@
 
                     <div className="flex-1 glass-panel print-glass rounded-xl border border-slate-700/50 p-6 flex flex-col">
                         
-                        {/* Toggle */}
                         <div className="flex justify-center mb-8 shrink-0">
                             <div className="bg-slate-900 p-1 rounded-xl flex border border-slate-700">
                                 <button onClick={() => setModel('scientific')} className={`px-6 py-2 rounded-lg font-semibold transition-all ${model === 'scientific' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>
@@ -664,7 +640,6 @@
                             </div>
                         </div>
 
-                        {/* Visualization Board */}
                         <div className="flex-1 bg-slate-950/50 rounded-xl border border-slate-800 p-8 flex items-center justify-center relative overflow-hidden">
                             {model === 'scientific' ? (
                                 <div className="flex items-center gap-4 animate-fade-in w-full max-w-3xl overflow-x-auto">
@@ -689,7 +664,6 @@
                                 </div>
                             ) : (
                                 <div className="relative w-64 h-64 animate-fade-in">
-                                    {/* Circular Agile Flow */}
                                     <div className="absolute inset-0 border-4 border-dashed border-brand-500/30 rounded-full animate-[spin_10s_linear_infinite]"></div>
                                     
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 border-2 border-brand-500 p-3 rounded-lg text-center shadow-lg shadow-brand-900/20">
@@ -727,7 +701,6 @@
             );
         };
 
-        // 6. BREAKOUT ROOMS
         const TabBreakoutRooms = () => {
             const prompts = [
                 {
@@ -801,13 +774,11 @@
             return (
                 <div className="flex h-screen bg-slate-950 overflow-hidden relative">
                     
-                    {/* Background Graphic elements */}
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 print-hide">
                         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-900/20 rounded-full blur-[100px]"></div>
                         <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-tech-900/20 rounded-full blur-[100px]"></div>
                     </div>
 
-                    {/* Fixed Sidebar Navigation */}
                     <nav className="w-20 md:w-24 bg-slate-900/80 backdrop-blur-xl border-r border-slate-800 flex flex-col items-center py-6 z-20 shrink-0 print-hide">
                         <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center font-black text-white mb-6 shadow-lg shadow-brand-500/20">
                             OB
@@ -825,7 +796,6 @@
                                 >
                                     {item.icon}
                                     
-                                    {/* Tooltip */}
                                     <div className="absolute left-full ml-4 px-3 py-1.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 border border-slate-700">
                                         {item.label}
                                     </div>
@@ -841,10 +811,8 @@
                         </button>
                     </nav>
 
-                    {/* Main Content Area */}
                     <main className="flex-1 flex flex-col h-full overflow-y-auto z-10 relative print:w-full print:overflow-visible">
                         
-                        {/* Header */}
                         <header className="px-8 py-6 border-b border-slate-800/50 bg-slate-950/50 backdrop-blur-md sticky top-0 z-30 print-glass print:border-b-2">
                             <div className="max-w-5xl mx-auto flex justify-between items-end">
                                 <div>
@@ -860,7 +828,6 @@
                             </div>
                         </header>
 
-                        {/* Dynamic Tab Content */}
                         <div className="flex-1 p-6 md:p-10">
                             <div className="max-w-5xl mx-auto h-full">
                                 {activeTab === 'case' && <TabCaseInsight />}
@@ -881,6 +848,13 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+        `;
+
+        // Compiles JSX cleanly on deployment architecture
+        const output = Babel.transform(code, { presets: ["react", "env"] }).code;
+        const scriptEl = document.createElement("script");
+        scriptEl.text = output;
+        document.body.appendChild(scriptEl);
     </script>
 </body>
 </html>
